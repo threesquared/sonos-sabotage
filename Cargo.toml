@@ -1,0 +1,7 @@
+[package]
+name = "sonos_fucker"
+version = "0.1.0"
+authors = ["threesquared <ben@3sq.re>"]
+
+[dependencies]
+sonos = "0.1.2"
