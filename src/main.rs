@@ -59,11 +59,15 @@ fn main() {
             let previous_state = get_previous_state(device.ip);
 
             if matches.is_present("oldMan") {
-                println!("Old man mode is turned on");
-
                 if previous_state.is_some() {
                     let previous_volume = previous_state.unwrap().volume;
-                    println!("Old state {}", previous_volume);
+                    let difference = current_volume - previous_volume;
+
+                    if difference > 2 {
+                        println!("Detected increase of {} percent!", difference);
+                        let reduction = previous_volume - (difference * 2);
+                        device.set_volume(reduction).unwrap();
+                    }
                 }
             }
 
