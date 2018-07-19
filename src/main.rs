@@ -22,7 +22,7 @@ fn get_previous_state(ip: std::net::IpAddr) -> Option<SpeakerState> {
 }
 
 fn main() {
-    let matches = App::new("Sonos Fucker")
+    let matches = App::new("stuxsonos")
         .version("0.1.0")
         .arg(Arg::with_name("interval")
             .help("The refresh interval to poll devices in ms")
@@ -53,8 +53,8 @@ fn main() {
         }
 
         for device in devices.iter() {
-            let volume = device.volume().unwrap();
-            println!("Found device {} at {} at {}% volume.", device.name, device.ip, volume);
+            let current_volume = device.volume().unwrap();
+            println!("Found device {} at {} at {}% volume.", device.name, device.ip, current_volume);
 
             let previous_state = get_previous_state(device.ip);
 
@@ -62,12 +62,13 @@ fn main() {
                 println!("Old man mode is turned on");
 
                 if previous_state.is_some() {
-                    println!("Old state {}", previous_state.unwrap().volume);
+                    let previous_volume = previous_state.unwrap().volume;
+                    println!("Old state {}", previous_volume);
                 }
             }
 
             DEVICES.lock().unwrap().insert(device.ip, SpeakerState {
-                volume,
+                volume: current_volume,
             });
         }
     }
