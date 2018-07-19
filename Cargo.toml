@@ -3,6 +3,10 @@ name = "sonosfucker"
 version = "0.1.0"
 authors = ["threesquared <ben@3sq.re>"]
 
+[[bin]]
+name = "sonosfucker"
+path = "src/main.rs"
+
 [dependencies]
 sonos = "0.1.2"
 clap = "~2.32"
