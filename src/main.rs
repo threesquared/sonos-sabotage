@@ -53,10 +53,10 @@ fn main() {
         }
 
         for device in devices.iter() {
+            let volume = device.volume().unwrap();
             println!("Found device {} at {} at {}% volume.", device.name, device.ip, volume);
 
             let previous_state = get_previous_state(device.ip);
-            let volume = device.volume().unwrap();
 
             if matches.is_present("oldMan") {
                 println!("Old man mode is turned on");
