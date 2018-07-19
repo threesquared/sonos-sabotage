@@ -10,7 +10,7 @@ This CLI tool contains a number of modes designed to take various covert actions
 
 ## Installation
 
-TODO
+Download the latest binary for your platform from the [releases](https://github.com/threesquared/stuxsonos/releases) section.
 
 ## Usage
 

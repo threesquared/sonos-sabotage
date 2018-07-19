@@ -40,8 +40,3 @@ deploy:
 cache: cargo
 before_cache:
   - chmod -R a+r $HOME/.cargo
-
-branches:
-  only:
-    - /^v\d+\.\d+\.\d+.*$/
-    - master
