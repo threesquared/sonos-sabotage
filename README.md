@@ -1,4 +1,5 @@
 # stuxsonos
+[![Build Status](https://travis-ci.com/threesquared/stuxsonos.svg?branch=master)](https://travis-ci.com/threesquared/stuxsonos)
 
 > "It is the fight between tiger and elephant. If the tiger stands his ground, the elephant will crush him with its mass. But, if he conserves his mobility, he will finally vanquish the elephant, who bleeds from a multitude of cuts."
 >
