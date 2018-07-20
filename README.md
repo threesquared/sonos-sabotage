@@ -6,8 +6,10 @@
 
 ## Description
 
-This CLI tool contains a number of modes designed to take various covert and overt actions to disrupt or disable sonos
-devices on the local network for use in office cyber warfare.
+stuxsonos is a CLI tool for waging cyberwarfare in the office.
+It contains a number of different modes that take various covert and
+overt actions to disrupt or disable playback on Sonos devices within
+the local network.
 
 ## Installation
 
@@ -21,7 +23,8 @@ Get a full list of parameters:
 $ ./stuxsonos -h
 ```
 
-You can combine certain modes together and also set various options for others:
+You can combine certain modes together and also set various options
+to formulate your guerrilla strategy:
 
 ```sh
 $ ./stuxsonos -oa -p "Beyonce" -i 1000
