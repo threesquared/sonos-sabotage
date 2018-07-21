@@ -8,6 +8,7 @@ extern crate regex;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
+use std::net::IpAddr;
 use clap::{App, Arg};
 use rand::prelude::*;
 use regex::Regex;
@@ -69,16 +70,15 @@ fn main() {
              .help("This mode detects volume increases on devices and turns them down")
              .short("o")
              .long("oldman")
-             .conflicts_with_all(&[
-                "dictator",
-                "totalitarian"
-             ])
         )
         .arg(Arg::with_name("assassin")
             .help("This mode matches specific tracks and eliminates them")
             .short("a")
             .long("assassin")
-            .conflicts_with("totalitarian")
+            .conflicts_with_all(&[
+                "dictator",
+                "totalitarian"
+            ])
         )
         .arg(Arg::with_name("dictator")
             .help("This mode enforces a specific track to be playing")
@@ -105,9 +105,7 @@ fn main() {
     let tick = schedule_recv::periodic_ms(interval.parse::<u32>().unwrap());
 
     loop {
-        tick.recv().unwrap();
-
-        println!("Checking for Sonos devices...");
+        println!("Scanning for Sonos devices...");
 
         let devices = sonos::discover().unwrap();
 
@@ -121,6 +119,13 @@ fn main() {
 
             if matches.is_present("devices") {
                 break
+            }
+
+            if matches.is_present("ip") {
+                let ip = matches.value_of("ip").unwrap().parse::<IpAddr>().unwrap();
+                if device.ip != ip {
+                    break
+                }
             }
 
             let previous_state = get_previous_state(device.ip);
@@ -153,6 +158,8 @@ fn main() {
         if matches.is_present("devices") {
             break
         }
+
+        tick.recv().unwrap();
     }
 }
 
@@ -162,6 +169,7 @@ fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerS
         let previous_volume = previous_state.unwrap().volume;
         let difference: u8 = current_volume - previous_volume;
 
+        // TODO: Accept these params as arguments
         if difference > 5 {
             let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
 
@@ -178,6 +186,7 @@ fn assassin(device: &sonos::Speaker, pattern: &str) {
         let regex = Regex::new(pattern.trim()).unwrap();
 
         if regex.is_match(&track.title) || regex.is_match(&track.artist) {
+            // TODO: Optional subtle fade out and skip mode
             println!("Detected matched track! Assassinating {} {}", track.title, track.artist);
             device.next().unwrap();
         }
@@ -207,6 +216,7 @@ fn saboteur(device: &sonos::Speaker, percent: &str) {
     if action_chance > percent.parse::<u32>().unwrap() {
         let action_choice = rng.gen_range(1, 4);
 
+        // TODO: Add more choices and configurable weighted randomness
         match action_choice {
             1 => device.mute().unwrap(),
             2 => device.next().unwrap(),
