@@ -73,6 +73,3 @@ The track uri to play in dictator mode.
 `-x <ip>`
 
 Only perform actions against a specific device IP address
-
-### TODO
-* Threads

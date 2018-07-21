@@ -107,11 +107,12 @@ fn main() {
     loop {
         println!("Scanning for Sonos devices...");
 
+        // TODO: Move device discovery to its own thread
         let devices = sonos::discover().unwrap();
 
         if devices.len() == 0 {
             println!("No devices found!");
-            return;
+            continue;
         }
 
         for device in devices.iter() {
@@ -167,15 +168,18 @@ fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerS
     if previous_state.is_some() {
         let current_volume = device.volume().unwrap();
         let previous_volume = previous_state.unwrap().volume;
-        let difference: u8 = current_volume - previous_volume;
 
-        // TODO: Accept these params as arguments
-        if difference > 5 {
-            let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
+        if current_volume > previous_volume {
+            let difference: u8 = current_volume - previous_volume;
 
-            if reduction > 0 {
-                println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
-                device.set_volume(reduction as u8).unwrap();
+            // TODO: Accept these params as arguments
+            if difference > 5 {
+                let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
+
+                if reduction > 0 {
+                    println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
+                    device.set_volume(reduction as u8).unwrap();
+                }
             }
         }
     }
@@ -188,7 +192,14 @@ fn assassin(device: &sonos::Speaker, pattern: &str) {
         if regex.is_match(&track.title) || regex.is_match(&track.artist) {
             // TODO: Optional subtle fade out and skip mode
             println!("Detected matched track! Assassinating {} {}", track.title, track.artist);
-            device.next().unwrap();
+
+            match device.next() {
+                Ok(_) => println!("Skipped to next track in the queue"),
+                Err(err) => {
+                    device.stop().unwrap();
+                    println!("Could not skip, stopping playback")
+                }
+            }
         }
     }
 }
@@ -233,7 +244,7 @@ fn totalitarian(device: &sonos::Speaker) {
     let transport_state = device.transport_state().unwrap();
 
     if transport_state == sonos::TransportState::Playing {
-        println!("Device is playing, shutting it down {}", device.name);
+        println!("Device is active, shutting it down");
 
         device.stop().unwrap();
         device.clear_queue().unwrap();
