@@ -31,7 +31,7 @@ fn set_state(ip: std::net::IpAddr, state: SpeakerState) {
 }
 
 fn main() {
-    let matches = App::new("stuxsonos")
+    let matches = App::new("sonos-sabotage")
         .arg(Arg::with_name("interval")
             .help("The interval to poll for devices in ms")
             .short("i")

@@ -1,4 +1,4 @@
-# stuxsonos [![GitHub release](https://img.shields.io/github/release/threesquared/stuxsonos.svg)](https://github.com/threesquared/stuxsonos/releases) [![Build Status](https://travis-ci.com/threesquared/stuxsonos.svg?branch=master)](https://travis-ci.com/threesquared/stuxsonos)
+# Sonos Sabotage [![GitHub release](https://img.shields.io/github/release/threesquared/sonos-sabotage.svg)](https://github.com/threesquared/sonos-sabotage/releases) [![Build Status](https://travis-ci.com/threesquared/sonos-sabotage.svg?branch=master)](https://travis-ci.com/threesquared/sonos-sabotage)
 
 > "It is the fight between tiger and elephant. If the tiger stands his ground, the elephant will crush him with its mass. But, if he conserves his mobility, he will finally vanquish the elephant, who bleeds from a multitude of cuts."
 >
@@ -6,28 +6,28 @@
 
 ## Description
 
-stuxsonos is a CLI tool for waging cyberwarfare in the office.
+Sonos Sabotage is a CLI tool for waging cyberwarfare in the office.
 It contains a number of different modes that take various covert and
 overt actions to disrupt or disable playback on Sonos devices within
 the local network.
 
 ## Installation
 
-Download the latest binary for your platform from the [releases](https://github.com/threesquared/stuxsonos/releases) section.
+Download the latest binary for your platform from the [releases](https://github.com/threesquared/sonos-sabotage/releases) section.
 
 ## Usage
 
 Get a full list of parameters:
 
 ```sh
-$ ./stuxsonos -h
+$ ./sonos-sabotage -h
 ```
 
 You can combine certain modes together and also set various options
 to formulate your guerrilla strategy:
 
 ```sh
-$ ./stuxsonos -oa -p "Beyonce" -i 1000
+$ ./sonos-sabotage -oa -p "Beyonce" -i 1000
 ```
 
 ### Modes
