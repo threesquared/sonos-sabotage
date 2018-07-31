@@ -1,10 +1,10 @@
 [package]
-name = "stuxsonos"
+name = "sonos-sabotage"
 version = "0.1.0"
 authors = ["threesquared <ben@3sq.re>"]
 
 [[bin]]
-name = "stuxsonos"
+name = "sonos-sabotage"
 path = "src/main.rs"
 
 [dependencies]

@@ -195,7 +195,7 @@ fn assassin(device: &sonos::Speaker, pattern: &str) {
 
             match device.next() {
                 Ok(_) => println!("Skipped to next track in the queue"),
-                Err(err) => {
+                Err(_) => {
                     device.stop().unwrap();
                     println!("Could not skip, stopping playback")
                 }
