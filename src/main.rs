@@ -9,6 +9,7 @@ extern crate regex;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::net::IpAddr;
+use std::thread;
 use clap::{App, Arg};
 use rand::prelude::*;
 use regex::Regex;
@@ -19,23 +20,24 @@ pub struct SpeakerState {
 }
 
 lazy_static! {
-    static ref DEVICES: Mutex<HashMap<std::net::IpAddr, SpeakerState>> = Mutex::new(HashMap::new());
+    static ref DEVICES: Mutex<Vec<sonos::Speaker>> = Mutex::new(Vec::new());
+    static ref STATES: Mutex<HashMap<std::net::IpAddr, SpeakerState>> = Mutex::new(HashMap::new());
 }
 
-fn get_previous_state(ip: std::net::IpAddr) -> Option<SpeakerState> {
-    DEVICES.lock().unwrap().get(&ip).cloned()
+fn get_state(ip: std::net::IpAddr) -> Option<SpeakerState> {
+    STATES.lock().unwrap().get(&ip).cloned()
 }
 
 fn set_state(ip: std::net::IpAddr, state: SpeakerState) {
-    DEVICES.lock().unwrap().insert(ip, state);
+    STATES.lock().unwrap().insert(ip, state);
 }
 
 fn main() {
     let matches = App::new("sonos-sabotage")
         .arg(Arg::with_name("interval")
-            .help("The interval to poll for devices in ms")
+            .help("The interval to check devices in ms")
             .short("i")
-            .default_value("10000")
+            .default_value("3000")
             .takes_value(true)
         )
         .arg(Arg::with_name("pattern")
@@ -101,35 +103,25 @@ fn main() {
         )
         .get_matches();
 
+    discover_devices();
+
     let interval = matches.value_of("interval").unwrap();
     let tick = schedule_recv::periodic_ms(interval.parse::<u32>().unwrap());
 
     loop {
-        println!("Scanning for Sonos devices...");
-
-        // TODO: Move device discovery to its own thread
-        let devices = sonos::discover().unwrap();
-
-        if devices.len() == 0 {
-            println!("No devices found!");
-            continue;
-        }
+        let devices = DEVICES.lock().unwrap();
 
         for device in devices.iter() {
-            println!("Found device {} at {}", device.name, device.ip);
-
-            if matches.is_present("devices") {
-                break
-            }
+            println!("Checking device {} at {}", device.name, device.ip);
 
             if matches.is_present("ip") {
                 let ip = matches.value_of("ip").unwrap().parse::<IpAddr>().unwrap();
                 if device.ip != ip {
-                    break
+                    return
                 }
             }
 
-            let previous_state = get_previous_state(device.ip);
+            let previous_state = get_state(device.ip);
 
             if matches.is_present("oldman") {
                 old_man(device, previous_state);
@@ -156,12 +148,30 @@ fn main() {
             });
         }
 
-        if matches.is_present("devices") {
-            break
-        }
-
         tick.recv().unwrap();
     }
+}
+
+fn discover_devices() {
+    thread::spawn(|| {
+        let tick = schedule_recv::periodic_ms(10000);
+
+        loop {
+            println!("Scanning for Sonos devices...");
+
+            let devices = sonos::discover().unwrap();
+
+            if devices.len() == 0 {
+                println!("No devices found!");
+                continue;
+            }
+
+            let mut device_state = DEVICES.lock().expect("Could not lock device mutex");
+            *device_state = devices;
+
+            tick.recv().unwrap();
+        }
+    });
 }
 
 fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerState>) {
