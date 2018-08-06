@@ -1,4 +1,4 @@
-# Sonos Sabotage [![GitHub release](https://img.shields.io/github/release/threesquared/sonos-sabotage.svg)](https://github.com/threesquared/sonos-sabotage/releases) [![Build Status](https://travis-ci.com/threesquared/sonos-sabotage.svg?branch=master)](https://travis-ci.com/threesquared/sonos-sabotage)
+# Sonos Sabotage [![GitHub release](https://img.shields.io/github/release/threesquared/sonos-sabotage.svg)](https://github.com/threesquared/sonos-sabotage/releases) [![Build Status](https://travis-ci.com/threesquared/sonos-sabotage.svg?branch=master)](https://travis-ci.com/threesquared/sonos-sabotage) [![Build status](https://ci.appveyor.com/api/projects/status/in943rqu3ucaq7dc/branch/master?svg=true)](https://ci.appveyor.com/project/threesquared/sonos-sabotage/branch/master)
 
 > "It is the fight between tiger and elephant. If the tiger stands his ground, the elephant will crush him with its mass. But, if he conserves his mobility, he will finally vanquish the elephant, who bleeds from a multitude of cuts."
 >
