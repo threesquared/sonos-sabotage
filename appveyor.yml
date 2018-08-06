@@ -33,7 +33,7 @@ before_deploy:
 deploy:
   artifact: /.*\.zip/
   auth_token:
-    secure: d/hXYW3S/ExB88DkMd4Q7Q/P3UieJjKkCzx9AP8uBVFxPVw10pizdhA69fwGDvkneG0eIgKSJ2Y+lHF2g0DaqNqWW5ycKsSyOQihOHLDGm9iK9CLQ0nNoQXe88ptLnT6COU/rd5xXy8SUE9/WvIOtwfiP9b6cjn+jbtvpzzuX8pM+A0hnzWZe4UI/ruRO78+SXaKcriC2toBi9IuGVCZJ7p8YdONDq+dnAxEoRRwf2Q22tBi3sPcWziYD/5Wal9QDr2JTdJ61jGYP2LVnrnRir4//3jq7yUPidpRhfyaej17eLZaPyrflSQiUsj81cSaixmoGeiDgW0yx5yxdm2qbGw3dp+tBZ2LUGA1McAF2MLKxl6v2pH2In8tzFc8yHAyNS38/6c/e6cis74dT32hQiYvGw/HLna4rN4elSst7kf7oUvP36q1+bJLUNIYAcNQey0FjBuISB3DLGQ5hjvb8Oxt0slMha2b5z+bTDfbvCrxGKNXmy0R+53vgU/pjtP7yF/yfTYi0UYiuuU7V9ADoywKxc4Tx/f8o764arfw7KTaoRxAruR1p5VF3jQ5JLbxLTkNgXRgLKoeoORadkFWXpiEVttn9YOCDXTvCGKp4oB0ulJQ0w91ap+Q8IE5vAB9ihw58KEQRz3lc4XcC+4XuJCaCY2R9tl7cV1usLq97sM=
+    secure: Qqi/y37trm84VUvBa07suT7hT8HPq850xXrxbNQ7tUl6+Yrza/xCf9O3YSR7r7gd
   description: ''
   on:
     appveyor_repo_tag: true

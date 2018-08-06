@@ -2,7 +2,6 @@ dist: trusty
 language: rust
 services: docker
 sudo: required
-
 matrix:
   include:
     - env: TARGET=x86_64-unknown-linux-gnu
@@ -14,33 +13,26 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
       os: osx
       rust: nightly
-
 before_install:
   - set -e
   - rustup self update
-
 install:
   - sh ci/install.sh
   - source ~/.cargo/env || true
-
 script:
   - bash ci/script.sh
-
 after_script: set +e
-
 before_deploy:
   - sh ci/before_deploy.sh
-
 deploy:
-  api_key:
-    secure: d/hXYW3S/ExB88DkMd4Q7Q/P3UieJjKkCzx9AP8uBVFxPVw10pizdhA69fwGDvkneG0eIgKSJ2Y+lHF2g0DaqNqWW5ycKsSyOQihOHLDGm9iK9CLQ0nNoQXe88ptLnT6COU/rd5xXy8SUE9/WvIOtwfiP9b6cjn+jbtvpzzuX8pM+A0hnzWZe4UI/ruRO78+SXaKcriC2toBi9IuGVCZJ7p8YdONDq+dnAxEoRRwf2Q22tBi3sPcWziYD/5Wal9QDr2JTdJ61jGYP2LVnrnRir4//3jq7yUPidpRhfyaej17eLZaPyrflSQiUsj81cSaixmoGeiDgW0yx5yxdm2qbGw3dp+tBZ2LUGA1McAF2MLKxl6v2pH2In8tzFc8yHAyNS38/6c/e6cis74dT32hQiYvGw/HLna4rN4elSst7kf7oUvP36q1+bJLUNIYAcNQey0FjBuISB3DLGQ5hjvb8Oxt0slMha2b5z+bTDfbvCrxGKNXmy0R+53vgU/pjtP7yF/yfTYi0UYiuuU7V9ADoywKxc4Tx/f8o764arfw7KTaoRxAruR1p5VF3jQ5JLbxLTkNgXRgLKoeoORadkFWXpiEVttn9YOCDXTvCGKp4oB0ulJQ0w91ap+Q8IE5vAB9ihw58KEQRz3lc4XcC+4XuJCaCY2R9tl7cV1usLq97sM=
   file_glob: true
   file: sonos-sabotage-$TRAVIS_TAG-$TARGET.*
   on:
     tags: true
   provider: releases
   skip_cleanup: true
-
+  api-key:
+    secure: hWw4DTfQ2FSWua7juPbjw7Npn5SC8K3gwoqCNqBQcZGHD2ThJU9RI/nH+4eS1XsEGXZHs4xpU8bu5uEseDqED6tj4E2tJkcckY2TY8R9VthECWqcKu8pVw+GSLIru559BXaI84LHyw3+Ak9c1eOYtYCKl0Z5s9d+tUbA+NHSkZu3yB5k638Uja2QbXdjIThjyMlm9ooeCLGvqaM58LTT+K4OB4d0xxR+VLOuy6wpbZNVfVyNmjwsh1Qhb8o7SA0Ca4Ta1BqHmzidnpWucAup8KW6wFHvrZ+mK8jsxB+Tdu2QjCNXsA4sm+Vizhc567Rajt0R+9Hal0eFFZCa8kr3LzstTYohHCBJ/vK6rvAlROG7pGqVIq2ZZYY24jjwz1cYJksjnwZsJRemNSczJVNBZCo79b5GcMs50QrxhXMhrLZ2m5iDfG3xw+aU/a6LVd4zRbhZahZrzQAlv3aimbHV/lBIhwb4yp4atq/IxK/KpTqqdwiLLhm/PJi+zPI8MkJ3G0RJ9pYnNkXGUUQ6rZNP58ZhNu58oGu0kMoFq5w0uG8rc4FdHQfCAYf3cqyfNn6u3Z1HZ68uJbBPr0D/3h6VoTafR0iIFkpQV8hQu7rv4MAqKkZK+QEb1M5WiWuLHatF+7UI3yr5efhQqLs8fmEMVIR2ifXuHdNFC0u7GPJU/N0=
 cache: cargo
 before_cache:
   - chmod -R a+r $HOME/.cargo
