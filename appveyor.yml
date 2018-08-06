@@ -19,17 +19,14 @@ install:
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -Vv
   - cargo -V
-
 test_script:
   - if [%APPVEYOR_REPO_TAG%]==[false] (
     cargo build --target %TARGET% &&
     cargo build --target %TARGET% --release
     )
-
 before_deploy:
   - cargo rustc --target %TARGET% --release --bin sonos-sabotage -- -C lto
   - ps: ci\before_deploy.ps1
-
 deploy:
   artifact: /.*\.zip/
   auth_token:
@@ -38,14 +35,10 @@ deploy:
   on:
     appveyor_repo_tag: true
   provider: GitHub
-
 cache:
   - C:\Users\appveyor\.cargo\registry
   - target
-
 branches:
   only:
-    - /^v\d+\.\d+\.\d+.*$/
-    - master
-
+    - /^\d+\.\d+\.\d+.*$/
 build: false
