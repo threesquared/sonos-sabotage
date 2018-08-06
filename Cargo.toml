@@ -14,3 +14,6 @@ schedule_recv = "0.1.0"
 lazy_static = "1.0"
 rand = "0.5"
 regex = "1"
+
+[replace]
+"ssdp:0.6.0" = { git = "https://github.com/threesquared/ssdp-rs", branch = "interfaces" }
