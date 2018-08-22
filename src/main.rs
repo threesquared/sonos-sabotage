@@ -2,13 +2,13 @@
 extern crate lazy_static;
 extern crate clap;
 extern crate sonos;
-extern crate schedule_recv;
 extern crate rand;
 extern crate regex;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::net::IpAddr;
+use std::time::Duration;
 use std::thread;
 use clap::{App, Arg};
 use rand::prelude::*;
@@ -37,7 +37,13 @@ fn main() {
         .arg(Arg::with_name("interval")
             .help("The interval to check devices in ms")
             .short("i")
-            .default_value("3000")
+            .default_value("5000")
+            .takes_value(true)
+        )
+        .arg(Arg::with_name("scan")
+            .help("The interval to scan for new devices in ms")
+            .short("n")
+            .default_value("60000")
             .takes_value(true)
         )
         .arg(Arg::with_name("pattern")
@@ -103,10 +109,15 @@ fn main() {
         )
         .get_matches();
 
-    discover_devices();
+    thread::spawn(|| {
+        loop {
+            discover_devices();
 
-    let interval = matches.value_of("interval").unwrap();
-    let tick = schedule_recv::periodic_ms(interval.parse::<u32>().unwrap());
+            thread::sleep(Duration::from_millis(30000));
+        }
+    });
+
+    let check_interval = matches.value_of("interval").unwrap();
 
     loop {
         let devices = DEVICES.lock().unwrap();
@@ -148,30 +159,24 @@ fn main() {
             });
         }
 
-        tick.recv().unwrap();
+        thread::sleep(Duration::from_millis(check_interval.parse::<u64>().unwrap()));
     }
 }
 
 fn discover_devices() {
-    thread::spawn(|| {
-        let tick = schedule_recv::periodic_ms(10000);
+    println!("Scanning for Sonos devices...");
 
-        loop {
-            println!("Scanning for Sonos devices...");
+    let mut device_state = DEVICES.lock().expect("Could not lock device mutex");
+    let devices = sonos::discover().unwrap();
 
-            let devices = sonos::discover().unwrap();
+    if devices.len() == 0 {
+        println!("No devices found!");
+        return;
+    }
 
-            if devices.len() == 0 {
-                println!("No devices found!");
-                continue;
-            }
+    println!("Found {} devices", devices.len());
 
-            let mut device_state = DEVICES.lock().expect("Could not lock device mutex");
-            *device_state = devices;
-
-            tick.recv().unwrap();
-        }
-    });
+    *device_state = devices;
 }
 
 fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerState>) {
