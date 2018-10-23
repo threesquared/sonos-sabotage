@@ -185,7 +185,12 @@ fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerS
             if difference > 5 {
                 let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
 
-                if reduction > 0 {
+                if (current_volume - reduction) >= 0 {
+                    println!("Detected volume increase of {} points! Returning to previous volume of {}", difference, previous_volume);
+                    device.set_volume(1).unwrap();
+                }
+
+                else if reduction > 0 {
                     println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
                     device.set_volume(reduction as u8).unwrap();
                 }
