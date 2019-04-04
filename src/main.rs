@@ -1,3 +1,4 @@
+#![feature(proc_macro_hygiene)]
 #[macro_use]
 extern crate lazy_static;
 extern crate galvanic_mock;
@@ -14,7 +15,6 @@ use std::thread;
 use clap::{App, Arg};
 use rand::prelude::*;
 use regex::Regex;
-use sonos::Speaker;
 use galvanic_mock::{mockable, use_mocks};
 
 #[derive(Clone)]
@@ -319,11 +319,79 @@ fn totalitarian(device: &SpeakerTrait) {
 }
 
 #[cfg(test)]
+#[use_mocks]
 mod tests {
     use super::*;
 
     #[test]
-    #[use_mocks]
+    fn test_old_man() {
+        let mock = new_mock!(SpeakerTrait);
+
+        given! {
+            <mock as SpeakerTrait>::volume() then_return Ok(11) always;
+            <mock as SpeakerTrait>::set_volume() then_return Ok(()) always;
+        }
+
+        expect_interactions! {
+            <mock as SpeakerTrait>::set_volume() times 1;
+        }
+
+        old_man(&mock, Some(SpeakerState {
+            volume: 5,
+        }));
+    }
+
+    #[test]
+    fn test_assassin() {
+        let mock = new_mock!(SpeakerTrait);
+
+        given! {
+            <mock as SpeakerTrait>::track() then_return Ok(sonos::Track {
+                title: "testPattern".to_string(),
+                artist: "testPattern".to_string(),
+                album: "test".to_string(),
+                queue_position: 1,
+                uri: "test".to_string(),
+                duration: Duration::from_secs(300),
+                running_time: Duration::from_secs(100)
+            }) always;
+            <mock as SpeakerTrait>::next() then_return Ok(()) always;
+        }
+
+        expect_interactions! {
+            <mock as SpeakerTrait>::next() times 1;
+        }
+
+        assassin(&mock, "testPattern");
+    }
+
+    #[test]
+    fn test_dictator() {
+        let mock = new_mock!(SpeakerTrait);
+
+        given! {
+            <mock as SpeakerTrait>::track() then_return Ok(sonos::Track {
+                title: "test".to_string(),
+                artist: "test".to_string(),
+                album: "test".to_string(),
+                queue_position: 1,
+                uri: "test".to_string(),
+                duration: Duration::from_secs(300),
+                running_time: Duration::from_secs(100)
+            }) always;
+            <mock as SpeakerTrait>::clear_queue() then_return Ok(()) always;
+            <mock as SpeakerTrait>::play_track() then_return Ok(()) always;
+        }
+
+        expect_interactions! {
+            <mock as SpeakerTrait>::clear_queue() times 1;
+            <mock as SpeakerTrait>::play_track() times 1;
+        }
+
+        dictator(&mock, "testURI");
+    }
+
+    #[test]
     fn test_totalitarian() {
         let mock = new_mock!(SpeakerTrait);
 
