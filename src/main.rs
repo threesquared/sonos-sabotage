@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
+extern crate galvanic_mock;
 extern crate clap;
 extern crate sonos;
 extern crate rand;
@@ -13,10 +14,63 @@ use std::thread;
 use clap::{App, Arg};
 use rand::prelude::*;
 use regex::Regex;
+use sonos::Speaker;
+use galvanic_mock::{mockable, use_mocks};
 
 #[derive(Clone)]
 pub struct SpeakerState {
     pub volume: u8,
+}
+
+pub struct SonosSpeaker<'a> {
+    pub sonos: &'a sonos::Speaker,
+}
+
+#[mockable]
+pub trait SpeakerTrait {
+    fn pause(&self) -> Result<(), sonos::Error>;
+    fn stop(&self) -> Result<(), sonos::Error>;
+    fn next(&self) -> Result<(), sonos::Error>;
+    fn clear_queue(&self) -> Result<(), sonos::Error>;
+    fn play_track(&self, uri: &str) -> Result<(), sonos::Error>;
+    fn volume(&self) -> Result<u8, sonos::Error>;
+    fn set_volume(&self, volume: u8) -> Result<(), sonos::Error>;
+    fn mute(&self) -> Result<(), sonos::Error>;
+    fn transport_state(&self) -> Result<sonos::TransportState, sonos::Error>;
+    fn track(&self) -> Result<sonos::Track, sonos::Error>;
+}
+
+impl<'a> SpeakerTrait for SonosSpeaker<'a> {
+    fn pause(&self) -> Result<(), sonos::Error> {
+        self.sonos.pause()
+    }
+    fn stop(&self) -> Result<(), sonos::Error> {
+        self.sonos.stop()
+    }
+    fn next(&self) -> Result<(), sonos::Error> {
+        self.sonos.next()
+    }
+    fn clear_queue(&self) -> Result<(), sonos::Error> {
+        self.sonos.clear_queue()
+    }
+    fn play_track(&self, uri: &str) -> Result<(), sonos::Error> {
+        self.sonos.play_track(uri)
+    }
+    fn volume(&self) -> Result<u8, sonos::Error> {
+        self.sonos.volume()
+    }
+    fn set_volume(&self, volume: u8) -> Result<(), sonos::Error> {
+        self.sonos.set_volume(volume)
+    }
+    fn mute(&self) -> Result<(), sonos::Error> {
+        self.sonos.mute()
+    }
+    fn transport_state(&self) -> Result<sonos::TransportState, sonos::Error> {
+        self.sonos.transport_state()
+    }
+    fn track(&self) -> Result<sonos::Track, sonos::Error> {
+        self.sonos.track()
+    }
 }
 
 lazy_static! {
@@ -128,24 +182,28 @@ fn main() {
 
             let previous_state = get_state(device.ip);
 
+            let sonos = SonosSpeaker {
+                sonos: device,
+            };
+
             if matches.is_present("oldman") {
-                old_man(device, previous_state);
+                old_man(&sonos, previous_state);
             }
 
             if matches.is_present("assassin") {
-                assassin(device, matches.value_of("pattern").unwrap());
+                assassin(&sonos, matches.value_of("pattern").unwrap());
             }
 
             if matches.is_present("dictator") {
-                dictator(device, matches.value_of("uri").unwrap());
+                dictator(&sonos, matches.value_of("uri").unwrap());
             }
 
             if matches.is_present("saboteur") {
-                saboteur(device, matches.value_of("percent").unwrap());
+                saboteur(&sonos, matches.value_of("percent").unwrap());
             }
 
             if matches.is_present("totalitarian") {
-                totalitarian(device);
+                totalitarian(&sonos);
             }
 
             set_state(device.ip, SpeakerState {
@@ -173,7 +231,7 @@ fn discover_devices() {
     *device_state = devices;
 }
 
-fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerState>) {
+fn old_man(device: &SpeakerTrait, previous_state: std::option::Option<SpeakerState>) {
     if previous_state.is_some() {
         let current_volume = device.volume().unwrap();
         let previous_volume = previous_state.unwrap().volume;
@@ -194,7 +252,7 @@ fn old_man(device: &sonos::Speaker, previous_state: std::option::Option<SpeakerS
     }
 }
 
-fn assassin(device: &sonos::Speaker, pattern: &str) {
+fn assassin(device: &SpeakerTrait, pattern: &str) {
     if let Ok(track) = device.track() {
         let regex = Regex::new(pattern.trim()).unwrap();
 
@@ -213,7 +271,7 @@ fn assassin(device: &sonos::Speaker, pattern: &str) {
     }
 }
 
-fn dictator(device: &sonos::Speaker, uri: &str) {
+fn dictator(device: &SpeakerTrait, uri: &str) {
     if let Ok(track) = device.track() {
         if track.uri == uri {
             return
@@ -229,7 +287,7 @@ fn dictator(device: &sonos::Speaker, uri: &str) {
     }
 }
 
-fn saboteur(device: &sonos::Speaker, percent: &str) {
+fn saboteur(device: &SpeakerTrait, percent: &str) {
     let mut rng = thread_rng();
     let action_chance = rng.gen_range(0, 100);
 
@@ -249,7 +307,7 @@ fn saboteur(device: &sonos::Speaker, percent: &str) {
     }
 }
 
-fn totalitarian(device: &sonos::Speaker) {
+fn totalitarian(device: &SpeakerTrait) {
     let transport_state = device.transport_state().unwrap();
 
     if transport_state == sonos::TransportState::Playing {
@@ -257,5 +315,29 @@ fn totalitarian(device: &sonos::Speaker) {
 
         device.stop().unwrap();
         device.clear_queue().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[use_mocks]
+    fn test_totalitarian() {
+        let mock = new_mock!(SpeakerTrait);
+
+        given! {
+            <mock as SpeakerTrait>::transport_state() then_return Ok(sonos::TransportState::Playing) always;
+            <mock as SpeakerTrait>::stop() then_return Ok(()) always;
+            <mock as SpeakerTrait>::clear_queue() then_return Ok(()) always;
+        }
+
+        expect_interactions! {
+            <mock as SpeakerTrait>::stop() times 1;
+            <mock as SpeakerTrait>::clear_queue() times 1;
+        }
+
+        totalitarian(&mock);
     }
 }

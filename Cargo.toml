@@ -15,4 +15,7 @@ rand = "0.5"
 regex = "1"
 
 [replace]
-"ssdp:0.6.0" = { git = "https://github.com/threesquared/ssdp-rs", branch = "interfaces" }
+"sonos:0.1.2" = { path = '/Users/ben/Projects/sonos.rs' }
+
+[dev-dependencies]
+galvanic-mock = "*"
