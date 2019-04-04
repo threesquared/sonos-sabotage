@@ -333,7 +333,7 @@ mod tests {
         }
 
         expect_interactions! {
-            <mock as SpeakerTrait>::set_volume() times 1;
+            <mock as SpeakerTrait>::set_volume(|&volume| volume == 4) times 1;
         }
 
         old_man(&mock, Some(SpeakerState {
