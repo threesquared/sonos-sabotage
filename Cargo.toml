@@ -15,7 +15,7 @@ rand = "0.5"
 regex = "1"
 
 [replace]
-"sonos:0.1.2" = { path = '/Users/ben/Projects/sonos.rs' }
+"sonos:0.1.2" = { git = "https://github.com/threesquared/sonos.rs", branch = "bump-ssdp" }
 
 [dev-dependencies]
 galvanic-mock = "*"
