@@ -23,6 +23,8 @@ test_script:
   - if [%APPVEYOR_REPO_TAG%]==[false] (
     cargo build --target %TARGET% &&
     cargo build --target %TARGET% --release
+    cargo test --target %TARGET% &&
+    cargo test --target %TARGET% --release &&
     )
 before_deploy:
   - cargo rustc --target %TARGET% --release --bin sonos-sabotage -- -C lto
@@ -41,4 +43,5 @@ cache:
 branches:
   only:
     - /^\d+\.\d+\.\d+.*$/
+    - master
 build: false

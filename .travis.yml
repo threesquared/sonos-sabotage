@@ -39,3 +39,4 @@ before_cache:
 branches:
   only:
   - /^\d+\.\d+\.\d+.*$/
+  - master
