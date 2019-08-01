@@ -8,7 +8,7 @@
 
 Sonos Sabotage is a CLI tool for waging cyberwarfare in the office.
 It contains a number of different modes that take various covert and
-overt actions to disrupt or disable playback on Sonos devices within
+overt actions to disrupt, disable or control playback on Sonos devices within
 the local network.
 
 ## Installation
@@ -30,11 +30,11 @@ to formulate your guerrilla strategy:
 $ ./sonos-sabotage -oa -p "Beyonce" -i 1000
 ```
 
-### Modes
+## Modes
 
 `-o, --oldman`
 
-This mode tracks the volume of all devices on the network. If it detects an increase of more than 5 points it will reduce the volume of that 
+This mode tracks the volume of all devices on the network. If it detects an increase of more than 5 points it will reduce the volume of that
 device by 1.3 times the detected increase in percentage points.
 
 `-a, --assassin`
@@ -55,7 +55,7 @@ This mode randomly performs operations like muting speakers, skipping/pausing tr
 
 This mode will clear the queue of all devices and stop any running tracks it finds.
 
-### Options
+## Options
 
 `-i <interval>`
 
