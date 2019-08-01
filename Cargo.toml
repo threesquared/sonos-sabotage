@@ -8,12 +8,9 @@ name = "sonos-sabotage"
 path = "src/main.rs"
 
 [dependencies]
-sonos = "0.1.2"
+sonos = { git = "https://github.com/w4/sonos.rs" }
 clap = "~2.32"
 lazy_static = "1.0"
 rand = "0.5"
 regex = "1"
 galvanic-mock = "*"
-
-[replace]
-"sonos:0.1.2" = { git = "https://github.com/threesquared/sonos.rs", branch = "bump-ssdp" }
