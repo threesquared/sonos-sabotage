@@ -74,7 +74,7 @@ The track uri to play in dictator mode.
 
 Only perform actions against a specific device IP address
 
-## Contributing
+## Build Instructions
 
 [Install Rustup](https://www.rust-lang.org/learn/get-started) to manage your Rust version.
 
