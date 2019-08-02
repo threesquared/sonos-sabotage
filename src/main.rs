@@ -241,12 +241,14 @@ fn old_man(device: &SpeakerTrait, previous_state: std::option::Option<SpeakerSta
 
             // TODO: Accept these params as arguments
             if difference > 5 {
-                let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
+                let mut reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
 
-                if reduction > 0 {
-                    println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
-                    device.set_volume(reduction as u8).unwrap();
+                if reduction <= 0 {
+                    reduction = 1;
                 }
+
+                println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
+                device.set_volume(reduction as u8).unwrap();
             }
         }
     }
@@ -334,10 +336,15 @@ mod tests {
 
         expect_interactions! {
             <mock as SpeakerTrait>::set_volume(|&volume| volume == 4) times 1;
+            <mock as SpeakerTrait>::set_volume(|&volume| volume == 1) times 1;
         }
 
         old_man(&mock, Some(SpeakerState {
             volume: 5,
+        }));
+
+        old_man(&mock, Some(SpeakerState {
+            volume: 1,
         }));
     }
 
