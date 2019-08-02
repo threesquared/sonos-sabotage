@@ -6,7 +6,7 @@ extern crate clap;
 extern crate sonos;
 extern crate rand;
 extern crate regex;
-
+​
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::net::IpAddr;
@@ -16,16 +16,16 @@ use clap::{App, Arg};
 use rand::prelude::*;
 use regex::Regex;
 use galvanic_mock::{mockable, use_mocks};
-
+​
 #[derive(Clone)]
 pub struct SpeakerState {
     pub volume: u8,
 }
-
+​
 pub struct SonosSpeaker<'a> {
     pub sonos: &'a sonos::Speaker,
 }
-
+​
 #[mockable]
 pub trait SpeakerTrait {
     fn pause(&self) -> Result<(), sonos::Error>;
@@ -39,7 +39,7 @@ pub trait SpeakerTrait {
     fn transport_state(&self) -> Result<sonos::TransportState, sonos::Error>;
     fn track(&self) -> Result<sonos::Track, sonos::Error>;
 }
-
+​
 impl<'a> SpeakerTrait for SonosSpeaker<'a> {
     fn pause(&self) -> Result<(), sonos::Error> {
         self.sonos.pause()
@@ -72,20 +72,20 @@ impl<'a> SpeakerTrait for SonosSpeaker<'a> {
         self.sonos.track()
     }
 }
-
+​
 lazy_static! {
     static ref DEVICES: Mutex<Vec<sonos::Speaker>> = Mutex::new(Vec::new());
     static ref STATES: Mutex<HashMap<std::net::IpAddr, SpeakerState>> = Mutex::new(HashMap::new());
 }
-
+​
 fn get_state(ip: std::net::IpAddr) -> Option<SpeakerState> {
     STATES.lock().unwrap().get(&ip).cloned()
 }
-
+​
 fn set_state(ip: std::net::IpAddr, state: SpeakerState) {
     STATES.lock().unwrap().insert(ip, state);
 }
-
+​
 fn main() {
     let matches = App::new("sonos-sabotage")
         .arg(Arg::with_name("interval")
@@ -156,110 +156,112 @@ fn main() {
             .long("totalitarian")
         )
         .get_matches();
-
+​
     thread::spawn(|| {
         loop {
             discover_devices();
-
+​
             thread::sleep(Duration::from_millis(30000));
         }
     });
-
+​
     let check_interval = matches.value_of("interval").unwrap();
-
+​
     loop {
         let devices = DEVICES.lock().unwrap();
-
+​
         for device in devices.iter() {
             println!("Checking device {} at {}", device.name, device.ip);
-
+​
             if matches.is_present("ip") {
                 let ip = matches.value_of("ip").unwrap().parse::<IpAddr>().unwrap();
                 if device.ip != ip {
                     return
                 }
             }
-
+​
             let previous_state = get_state(device.ip);
-
+​
             let sonos = SonosSpeaker {
                 sonos: device,
             };
-
+​
             if matches.is_present("oldman") {
                 old_man(&sonos, previous_state);
             }
-
+​
             if matches.is_present("assassin") {
                 assassin(&sonos, matches.value_of("pattern").unwrap());
             }
-
+​
             if matches.is_present("dictator") {
                 dictator(&sonos, matches.value_of("uri").unwrap());
             }
-
+​
             if matches.is_present("saboteur") {
                 saboteur(&sonos, matches.value_of("percent").unwrap());
             }
-
+​
             if matches.is_present("totalitarian") {
                 totalitarian(&sonos);
             }
-
+​
             set_state(device.ip, SpeakerState {
                 volume: device.volume().unwrap(),
             });
         }
-
+​
         thread::sleep(Duration::from_millis(check_interval.parse::<u64>().unwrap()));
     }
 }
-
+​
 fn discover_devices() {
     println!("Scanning for Sonos devices...");
-
+​
     let mut device_state = DEVICES.lock().expect("Could not lock device mutex");
     let devices = sonos::discover().unwrap();
-
+​
     if devices.len() == 0 {
         println!("No devices found!");
         return;
     }
-
+​
     println!("Found {} devices", devices.len());
-
+​
     *device_state = devices;
 }
-
+​
 fn old_man(device: &SpeakerTrait, previous_state: std::option::Option<SpeakerState>) {
     if previous_state.is_some() {
         let current_volume = device.volume().unwrap();
         let previous_volume = previous_state.unwrap().volume;
-
+​
         if current_volume > previous_volume {
             let difference: u8 = current_volume - previous_volume;
-
+​
             // TODO: Accept these params as arguments
             if difference > 5 {
-                let reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
-
-                if reduction > 0 {
-                    println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
-                    device.set_volume(reduction as u8).unwrap();
+                let mut reduction: i8 = current_volume as i8 - (difference as f32 * 1.3) as i8;
+​
+                if reduction <= 0 {
+                    reduction = 1;
                 }
+​
+                println!("Detected volume increase of {} points! Decreasing to {}", difference, reduction);
+                device.set_volume(reduction as u8).unwrap();
             }
         }
     }
 }
-
+​
 fn assassin(device: &SpeakerTrait, pattern: &str) {
     if let Ok(track) = device.track() {
         let regex = Regex::new(pattern.trim()).unwrap();
-
+​
         if regex.is_match(&track.title) || regex.is_match(&track.artist) {
             // TODO: Optional subtle fade out and skip mode
             println!("Detected matched track! Assassinating {} {}", track.title, track.artist);
-
+​
             match device.next() {
                 Ok(_) => println!("Skipped to next track in the queue"),
                 Err(_) => {
@@ -270,30 +272,30 @@ fn assassin(device: &SpeakerTrait, pattern: &str) {
         }
     }
 }
-
+​
 fn dictator(device: &SpeakerTrait, uri: &str) {
     if let Ok(track) = device.track() {
         if track.uri == uri {
             return
         }
         println!("Device playing forbidden track! {} {}", track.uri, uri);
-
+​
         device.clear_queue().unwrap();
-
+​
         match device.play_track(uri) {
             Ok(_) => println!("Corrected it"),
             Err(err) => println!("Could not dictate track, {}", err)
         }
     }
 }
-
+​
 fn saboteur(device: &SpeakerTrait, percent: &str) {
     let mut rng = thread_rng();
     let action_chance = rng.gen_range(0, 100);
-
+​
     if action_chance > percent.parse::<u32>().unwrap() {
         let action_choice = rng.gen_range(1, 4);
-
+​
         // TODO: Add more choices and configurable weighted randomness
         match action_choice {
             1 => device.mute().unwrap(),
@@ -302,49 +304,54 @@ fn saboteur(device: &SpeakerTrait, percent: &str) {
             4 => device.pause().unwrap(),
             _ => {},
         }
-
+​
         println!("Sabotage device with {}", action_choice);
     }
 }
-
+​
 fn totalitarian(device: &SpeakerTrait) {
     let transport_state = device.transport_state().unwrap();
-
+​
     if transport_state == sonos::TransportState::Playing {
         println!("Device is active, shutting it down");
-
+​
         device.stop().unwrap();
         device.clear_queue().unwrap();
     }
 }
-
+​
 #[cfg(test)]
 #[use_mocks]
 mod tests {
     use super::*;
-
+​
     #[test]
     fn test_old_man() {
         let mock = new_mock!(SpeakerTrait);
-
+​
         given! {
             <mock as SpeakerTrait>::volume() then_return Ok(11) always;
             <mock as SpeakerTrait>::set_volume() then_return Ok(()) always;
         }
-
+​
         expect_interactions! {
             <mock as SpeakerTrait>::set_volume(|&volume| volume == 4) times 1;
+            <mock as SpeakerTrait>::set_volume(|&volume| volume == 1) times 1;
         }
-
+​
         old_man(&mock, Some(SpeakerState {
             volume: 5,
         }));
+​
+        old_man(&mock, Some(SpeakerState {
+            volume: 1,
+        }));
     }
-
+​
     #[test]
     fn test_assassin() {
         let mock = new_mock!(SpeakerTrait);
-
+​
         given! {
             <mock as SpeakerTrait>::track() then_return Ok(sonos::Track {
                 title: "testPattern".to_string(),
@@ -357,18 +364,18 @@ mod tests {
             }) always;
             <mock as SpeakerTrait>::next() then_return Ok(()) always;
         }
-
+​
         expect_interactions! {
             <mock as SpeakerTrait>::next() times 1;
         }
-
+​
         assassin(&mock, "testPattern");
     }
-
+​
     #[test]
     fn test_dictator() {
         let mock = new_mock!(SpeakerTrait);
-
+​
         given! {
             <mock as SpeakerTrait>::track() then_return Ok(sonos::Track {
                 title: "test".to_string(),
@@ -382,30 +389,30 @@ mod tests {
             <mock as SpeakerTrait>::clear_queue() then_return Ok(()) always;
             <mock as SpeakerTrait>::play_track() then_return Ok(()) always;
         }
-
+​
         expect_interactions! {
             <mock as SpeakerTrait>::clear_queue() times 1;
             <mock as SpeakerTrait>::play_track() times 1;
         }
-
+​
         dictator(&mock, "testURI");
     }
-
+​
     #[test]
     fn test_totalitarian() {
         let mock = new_mock!(SpeakerTrait);
-
+​
         given! {
             <mock as SpeakerTrait>::transport_state() then_return Ok(sonos::TransportState::Playing) always;
             <mock as SpeakerTrait>::stop() then_return Ok(()) always;
             <mock as SpeakerTrait>::clear_queue() then_return Ok(()) always;
         }
-
+​
         expect_interactions! {
             <mock as SpeakerTrait>::stop() times 1;
             <mock as SpeakerTrait>::clear_queue() times 1;
         }
-
+​
         totalitarian(&mock);
     }
 }
