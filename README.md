@@ -30,7 +30,7 @@ to formulate your guerrilla strategy:
 $ ./sonos-sabotage -oa -p "Beyonce" -i 1000
 ```
 
-## Modes
+### Modes
 
 `-o, --oldman`
 
@@ -55,7 +55,7 @@ This mode randomly performs operations like muting speakers, skipping/pausing tr
 
 This mode will clear the queue of all devices and stop any running tracks it finds.
 
-## Options
+### Options
 
 `-i <interval>`
 
@@ -73,3 +73,13 @@ The track uri to play in dictator mode.
 `-x <ip>`
 
 Only perform actions against a specific device IP address
+
+## Contributing
+
+[Install Rustup](https://www.rust-lang.org/learn/get-started) to manage your Rust version.
+
+`curl https://sh.rustup.rs -sSf | sh`
+
+Make sure to customise your installation and choose the **nightly** track. All other default configuration is fine.
+
+Once that’s done, `cargo run` to build and run. You can also `cargo build` to build a binary you can run and pass in options.
